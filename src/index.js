@@ -1,12 +1,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+
+import App from './components/App';
+import { server, port } from './common/config';
+
 import './index.css';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
 
-ReactDOM.render(<App />, document.getElementById('root'));
+const socket = new WebSocket(`ws://${server}:${port}`);
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: http://bit.ly/CRA-PWA
-serviceWorker.unregister();
+const socketSend = ({ type, content }) =>
+  socket.send(JSON.stringify({ type, content }));
+
+ReactDOM.render(
+  <App {...{ socket, socketSend }} />,
+  document.getElementById('root')
+);
