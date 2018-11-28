@@ -5,16 +5,22 @@ import ChatBar from './ChatBar';
 
 import './App.css';
 
-const Header = ({ currentUser: { name } }) => (
+const Header = ({ currentUser: { name, id }, clients }) => (
   <div className="header">
     <h2>Chatty</h2>
-    <div>{name}</div>
+    <div>
+      {name} {id && `(${id})`} ({clients.length})
+    </div>
   </div>
 );
 
 const App = ({ socket, socketSend }) => {
-  const [currentUser, setCurrentUser] = useState({ name: 'Anonymous' });
+  const [currentUser, setCurrentUser] = useState({
+    name: 'Anonymous',
+    id: null
+  });
   const [messages, setMessages] = useState([]);
+  const [clients, setClients] = useState([]);
 
   const setUsername = name => {
     setCurrentUser({ ...currentUser, name });
@@ -44,6 +50,12 @@ const App = ({ socket, socketSend }) => {
         case 'incomingNotification':
           setMessages([...messages, { ...content, type: 'notification' }]);
           break;
+        case 'incomingClientInit':
+          setCurrentUser({ ...currentUser, id: content.id });
+          break;
+        case 'incomingClients':
+          setClients(content);
+          break;
         default:
           console.error(`Unrecognized message:\n"${data}"`);
           break;
@@ -53,7 +65,7 @@ const App = ({ socket, socketSend }) => {
 
   return (
     <div className="app">
-      <Header {...{ currentUser }} />
+      <Header {...{ currentUser, clients }} />
       <MessageList {...{ messages }} />
       <ChatBar {...{ currentUser, setUsername, addMessage }} />
     </div>
