@@ -20,6 +20,11 @@ h6 {
   flex: 1;
 }
 
+.message-list {
+  overflow-y: scroll;
+  height: 0px;
+}
+
 .message-list .message {
   display: flex;
   justify-content: space-between;
@@ -38,11 +43,6 @@ h6 {
   margin: 20px 5px;
 }
 
-.message-list .notification {
-  text-align: center;
-  font-style: italic;
-}
-
 .chat-bar input {
   margin: 5px;
 }
@@ -55,6 +55,11 @@ h6 {
 /* FONTS */
 .message-list .username {
   font-weight: bold;
+}
+
+.message-list .notification {
+  text-align: center;
+  font-style: italic;
 }
 
 /* COLORS */

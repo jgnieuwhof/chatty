@@ -5,44 +5,42 @@ import ChatBar from './ChatBar';
 
 import './App.css';
 
-const Header = ({ currentUser: { name, id }, clients }) => (
+const Header = ({ currentUser, clients }) => (
   <div className="header">
     <h2>Chatty</h2>
-    <div>
-      {name} {id && `(${id})`} ({clients.length})
-    </div>
+    {currentUser && (
+      <div>
+        {currentUser.name} {currentUser.id && `(${currentUser.id})`} (
+        {Object.keys(clients).length})
+      </div>
+    )}
   </div>
 );
 
 const App = ({ socket, socketSend }) => {
-  const [currentUser, setCurrentUser] = useState({
-    name: 'Anonymous',
-    id: null
-  });
+  const [userId, setUserId] = useState(null);
   const [messages, setMessages] = useState([]);
-  const [clients, setClients] = useState([]);
+  const [clients, setClients] = useState({});
+  const currentUser = clients[userId];
 
   const setUsername = name => {
-    setCurrentUser({ ...currentUser, name });
     socketSend({
-      type: 'postNotification',
-      content: {
-        username: name,
-        content: `${currentUser.name} has changed their name to ${name}.`
-      }
+      type: 'postChangeUsername',
+      content: { userId, name }
     });
   };
 
   const addMessage = content => {
     socketSend({
       type: 'postMessage',
-      content: { username: currentUser.name, content }
+      content: { userId, username: currentUser.name, content }
     });
   };
 
   useEffect(() => {
     socket.onmessage = ({ data }) => {
       const { type, content } = JSON.parse(data);
+      console.log({ type, content });
       switch (type) {
         case 'incomingMessage':
           setMessages([...messages, { ...content, type: 'message' }]);
@@ -51,10 +49,13 @@ const App = ({ socket, socketSend }) => {
           setMessages([...messages, { ...content, type: 'notification' }]);
           break;
         case 'incomingClientInit':
-          setCurrentUser({ ...currentUser, id: content.id });
+          setUserId(content.id);
+          break;
+        case 'incomingUpdateClient':
+          setClients({ ...clients, [content.id]: content });
           break;
         case 'incomingClients':
-          setClients(content);
+          setClients(content.reduce((obj, c) => ({ ...obj, [c.id]: c }), {}));
           break;
         default:
           console.error(`Unrecognized message:\n"${data}"`);
@@ -66,7 +67,7 @@ const App = ({ socket, socketSend }) => {
   return (
     <div className="app">
       <Header {...{ currentUser, clients }} />
-      <MessageList {...{ messages }} />
+      <MessageList {...{ clients, messages }} />
       <ChatBar {...{ currentUser, setUsername, addMessage }} />
     </div>
   );

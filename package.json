@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "is-image-url": "^1.1.8",
     "react": "^16.7.0-alpha",
     "react-dom": "^16.7.0-alpha",
     "react-scripts": "2.1.1"

@@ -1,8 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-const ChatBar = ({ currentUser: { name }, setUsername, addMessage }) => {
-  const [usernameInput, setUsernameInput] = useState(name);
+const ChatBar = ({ currentUser, setUsername, addMessage }) => {
+  const [usernameInput, setUsernameInput] = useState('');
   const [messageInput, setMessageInput] = useState('');
+  useEffect(
+    () => {
+      setUsernameInput(currentUser ? currentUser.name : '');
+    },
+    [currentUser]
+  );
   return (
     <div className="chat-bar">
       <input
